@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Search from './components/search.jsx'
 import Spinner from './components/spinner.jsx'
 import MoiveCard from './components/MoiveCard.jsx';
+import { useDebounce } from 'react-use'; // implement by running `npm i react-use` in the terminal
 
 const API_BASE_URL = 'https://api.themoviedb.org/3'
 
@@ -19,6 +20,11 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  // Debounce the search term so that we don't make a request for every key stroke
+  // This will only update the debouncedSearchTerm state after the user has stopped typing for 500ms
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
   const fetchMovies = async (query = '') => {
     setIsLoading(true);
@@ -52,8 +58,8 @@ const App = () => {
   }
 
   useEffect(() => {
-    fetchMovies(searchTerm);
-  }, [searchTerm]); // This will run the fetchMovies function whenever the searchTerm changes
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]); // This will run the fetchMovies function whenever the searchTerm changes
 
   return (
     <main>
